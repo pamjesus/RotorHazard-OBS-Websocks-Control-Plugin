@@ -8,20 +8,17 @@ from monotonic import monotonic
 from .obs_manager import NoOBSManager, OBSManager
 import gevent.monkey
 import obsws_python as obs
+import RHAPI
 
 OBS = {}
-SOCKET_IO = None
+RH_API : RHAPI = None
 MODULE_NAME = 'OBS_WS'
 time_before_start_ms = 0
 
 
 def emite_priority_message(message, interrupt = False):
     ''' Emits message to clients '''
-    emit_payload = {
-        'message': message,
-        'interrupt': interrupt
-    }
-    SOCKET_IO.emit('priority_message', emit_payload)
+    RH_API.emit_priority_message(message, interrupt)
 
 
 def do_ObsInitialize_fn(args):
@@ -68,8 +65,8 @@ def do_race_stage(args):
 
 
 def initialize(**kwargs):
-    global SOCKET_IO
-    SOCKET_IO = kwargs['SOCKET_IO']
+    global RH_API
+    RH_API = kwargs['RHAPI'] 
     if 'Events' in kwargs:
         kwargs['Events'].on(Evt.STARTUP, 'ObsInitialize', do_ObsInitialize_fn, {}, 101 )
         kwargs['Events'].on(Evt.RACE_STOP, 'ObsRaceStop', do_race_stop, {}, 101 )
