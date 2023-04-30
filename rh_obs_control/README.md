@@ -1,6 +1,6 @@
-## OBS_Websocks
+## OBS_Websocks_Control
  OBS websocks plugin for Rotorhazard to allow control recording at start and stop of the race.
-
+ 
 ## Features
 * Start/Stop OBS recording at every race. 
 * Star recording before race starts (parameter in milliseconds)
