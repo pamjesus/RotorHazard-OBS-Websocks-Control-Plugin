@@ -1,7 +1,7 @@
-# RotorHazard-OBS-Websocks-Control-Plugin
- OBS websocks plugin for Rotorhazard to allow control recording at start and stop of the race.
- 
- (This code had been in use in a local branch. Now migrated to own repo and make it public).
+# RotorHazard OBS Websocks Control Plugin
+This system allows RotorHazard to communicate to OBS Studio video application and control the video remotely. The Rotohazard start race and stop race events will start and stop the video recording at the OBS studio.
+
+This software is distributed as form of plugin to be added to the RotorHazard.
 
 ## Features
 * Start/Stop OBS recording at every race. 
@@ -10,21 +10,27 @@
 * A start/stop recording failure raises a high-priority message in the front end.
  
 
-## Compability
- V 1.0.0   It is compatible with RotorHazard since v3.2.0 (the start of plug-ins).
-           This is temporary version; only while the existence of access to object SOCKET_IO.
+## Installation and Setup
 
+The system is composed of a RotoHazard plugin and a software OBS studio for video recording.
 
-## Install
+### Install Plugin
+
+Current version requires RotorHazard verions 3.2.x. 
+
+Copy the `obs_control` plugin into the `src/server/plugins` directory in your RotorHazard install.
 
 Install dependencies. File available inside the plugin directory.
 
-  pip install -r .\requirements.txt
+```
+    pip install -r .\requirements.txt
+```
 
-Add the config "BS_WS", sample below, to the bottom of the config.json file.
+### Configure Plugin
+
+In RotorHazard's `config.json` file, add the following section.
 
 ```
-{
 "OBS_WS": {
 	"ENABLED": true,
 	"HOST": "127.0.0.1",
@@ -32,11 +38,9 @@ Add the config "BS_WS", sample below, to the bottom of the config.json file.
 	"PASSWORD": "YourPassword",
 	"PRE_START": 2000
   }
-}
 ```
 
-
-Set your IP, port, and password.
+Set your OBS parameters like IP, port, and password.
 
 This plug-in can be active/inactive by setting the parameter ENABLED accordingly.
 
@@ -52,7 +56,3 @@ Go to tools > obs-socket_sething
 Then set the server port and the password. 
 
 <img src="./image/Obs_02_sethings.png" alt="drawing" width="600"/>
-
-
-
-
