@@ -1,5 +1,5 @@
 # RotorHazard OBS Websocks Control Plugin
-This system allows RotorHazard to communicate to OBS Studio video application and control the video remotely. The Rotohazard start race and stop race events will start and stop the video recording at the OBS studio.
+This system allows RotorHazard to communicate to [OBS Studio](https://obsproject.com/) video application and control the video remotely. The Rotohazard start race and stop race events will start and stop the video recording automatly.
 
 This software is distributed as form of plugin to be added to the RotorHazard.
 
