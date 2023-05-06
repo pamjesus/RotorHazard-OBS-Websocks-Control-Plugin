@@ -10,13 +10,17 @@ This software is distributed as form of plugin to be added to the RotorHazard.
 * A start/stop recording failure raises a high-priority message in the front end.
  
 
+## Compatibility between plugin and Rotohazard
+ * Plugin version 1.x is compatible with RotorHazard version 3.2.x only.
+ * Plugin version 2.x is compatible with Rotohazard starting at version 4.0.0. 
+
 ## Installation and Setup
 
 The system is composed of a RotoHazard plugin and a software OBS studio for video recording.
 
 ### Install Plugin
 
-Current version requires RotorHazard verions 3.2.x. 
+Current version requires RotorHazard verion 4.0.0 or later. 
 
 Copy the `obs_control` plugin into the `src/server/plugins` directory in your RotorHazard install.
 
