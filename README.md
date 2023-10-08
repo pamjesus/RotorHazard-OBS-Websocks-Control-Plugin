@@ -14,6 +14,15 @@ This software is distributed as a plugin to be added to the RotorHazard.
 * Start recording before the race ( helps detect false starts )
 * Record Video on multiple machines simultaneously. To bypass machine limitations.  (TODO)
 
+## Compatibility chart
+Obs Control PlugIn | Rotor Hazard  | OBS Studio
+--- | --- | ---
+1.0.x | 3.2.x |  >= 27.2.4
+2.0.x | 4.x.x |  >= 27.2.4
+
+PlugIn version 2.0 will be available after the release of RotorHazard 4.x. Until then, is available at the branch 2.0 of this git repository.
+
+
 ## Installation and Setup
 
 The system comprises a RotoHazard plugin and a software OBS studio for video recording.
