@@ -18,8 +18,11 @@ time_before_start_ms = 0
 
 def emite_priority_message(message, interrupt = False):
     ''' Emits message to clients '''
-    RH_API.emit_priority_message(message, interrupt)
-
+    if not interrupt:
+        RH_API.ui.message_notify(message)
+    else:
+        RH_API.ui.message_alert(message)
+    
 
 def do_ObsInitialize_fn(args):
     ''' Initialize OBS connection '''
@@ -64,10 +67,9 @@ def do_race_stage(args):
     do_race_start(args)
 
 
-def initialize(**kwargs):
+def initialize(rhapi):
     global RH_API
-    RH_API = kwargs['RHAPI'] 
-    if 'Events' in kwargs:
-        kwargs['Events'].on(Evt.STARTUP, 'ObsInitialize', do_ObsInitialize_fn, {}, 101 )
-        kwargs['Events'].on(Evt.RACE_STOP, 'ObsRaceStop', do_race_stop, {}, 101 )
-        kwargs['Events'].on(Evt.RACE_STAGE, 'ObsRaceStage', do_race_stage, {}, 101 )
+    RH_API = rhapi
+    rhapi.events.on(Evt.STARTUP, do_ObsInitialize_fn)
+    rhapi.events.on(Evt.RACE_STOP, do_race_stop)
+    rhapi.events.on(Evt.RACE_STAGE, do_race_stage)
