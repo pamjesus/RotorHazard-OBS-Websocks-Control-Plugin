@@ -31,6 +31,11 @@ class OBSManager():
         except:
             logger.error("OBS: Error connecting to configured instance")
 
+    def disconnect(self):
+        try:
+            self.rc.disconnect()
+        except:
+            logger.error("OBS: Error disconnecting from configured instance")
 
     def isEnabled(self):
         return True
