@@ -15,6 +15,13 @@ class NoOBSManager():
 
     def stop(self):
         return True
+   
+    def set_filename(self, fmt):
+        return True
+    
+    def get_current_filename(self):
+        return True
+
 
 class OBSManager():
     rc = None
@@ -68,3 +75,36 @@ class OBSManager():
                 return False
         return True
 
+
+        
+
+    def set_filename(self, fmt):
+        try:
+            self.rc.set_profile_parameter("Output","FilenameFormatting", fmt)
+            logger.info("OBS: Filename formatting set to "+fmt)
+        except:
+            self.connect()
+            try:
+                self.rc.set_profile_parameter("Output","FilenameFormatting", fmt)
+                logger.info("OBS: Filename formatting set to "+fmt)
+            except:
+                logger.error("OBS: Setting Filename formatting Failed")
+                return False
+        return True
+
+    def get_current_filename(self):
+        try:
+            #Saves the OLD formating
+            resp = self.rc.get_profile_parameter("Output","FilenameFormatting")
+            currentFilenameFormatting = resp.parameter_value
+            return currentFilenameFormatting
+        except:
+            self.connect()
+            try:
+                resp = self.rc.get_profile_parameter("Output","FilenameFormatting")
+                currentFilenameFormatting = resp.parameter_value
+                return currentFilenameFormatting
+            except:
+                logger.error("OBS: Getting Filename formatting Failed")
+                return ""
+        return ""

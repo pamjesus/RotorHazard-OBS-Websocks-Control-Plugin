@@ -44,7 +44,7 @@ class OBS_Actions():
             api_config.set(MODULE_NAME, "ENABLED", False)  
             api_config.set(MODULE_NAME, "PRE_START", 1000) 
             api_config.set(MODULE_NAME, "FILENAME", "%CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%Class-%Heat-%Round")
-            api_config.set(MODULE_NAME, "DIRNAME", "")
+            #api_config.set(MODULE_NAME, "DIRNAME", "")
             #################################
             logger.info("Module "+MODULE_NAME+"inicializado")
 
@@ -72,6 +72,53 @@ class OBS_Actions():
         logger.info("do_ObsInitialize_fn DONE" + ", current instance of " + type(self.OBS).__name__)
 
 
+    def format_name(self, template):
+        """
+        Formats a name string by replacing template placeholders with race-specific values.
+        Args:
+            template (str): The template string containing placeholders such as
+                '%heat', '%heat_id', '%class', '%class_id', and '%round'.
+        Returns:
+            str: The formatted string with placeholders replaced by corresponding race data.
+        Placeholders:
+            %heat      - Name of the current heat.
+            %heat_id   - ID of the current heat.
+            %class     - Name of the race class.
+            %class_id  - ID of the race class.
+            %round     - Current round number or identifier.
+        """
+       
+        #RHDATA = self._rhapi.race._racecontext.rhdata
+        #heat_id = self._rhapi.race.heat
+        #Heat = RHDATA.get_heat(heat_id)
+       #heat_name = Heat.name
+        #class_id = Heat.class_id
+        #class_name = RHDATA.get_raceClass(Heat.class_id).name
+        #round = self._rhapi.race.round
+
+
+        Rhdata = self._rhapi.race._racecontext.rhdata
+        heat_id = self._rhapi.race.heat
+        Heat = Rhdata.get_heat(heat_id)
+        
+        heat_name = Heat.name
+        class_name = Rhdata.get_raceClass(Heat.class_id).name
+        class_id =  Heat.class_id
+        round_num = self._rhapi.race.round
+
+        print((heat_id, heat_name, class_id, class_name, round_num) )
+        
+        result = (
+            template.replace("%heat", heat_name)
+            .replace("%heatId", str(heat_id))
+            .replace("%class", class_name)
+            .replace("%classId", str(class_id))
+            .replace("%round", str(round_num))
+        )
+
+        return result  
+        
+
     def do_race_start(self , args=None):
         logger.info("do_race_start")
         if not self.OBS.start():
@@ -80,6 +127,13 @@ class OBS_Actions():
 
     def do_race_stage(self, args):
         logger.info("do_race_stage")
+
+        #prepare OBS filename, inject RH data
+        self.currentFilenameFormatting = self.OBS.get_current_filename()
+        filename_base = self._rhapi.config.get(MODULE_NAME, "FILENAME")  
+        rh_filename =  self.format_name( filename_base )  
+        self.OBS.set_filename(rh_filename)
+
         #wait to before start
         while (monotonic() < args['pi_starts_at_s'] - (self.time_before_start_ms/1000)):
             gevent.sleep(0.1)
@@ -90,6 +144,10 @@ class OBS_Actions():
         logger.info("do_race_stop")
         if not self.OBS.stop():
             self.emite_priority_message("OBS: Stop Recording Failed")
+        #restore obs filename formating
+        self.OBS.set_filename( self.currentFilenameFormatting )
+
+
 
     def setSettings(self, args):  
         config = self._rhapi.config.get_all
@@ -107,7 +165,7 @@ class OBS_Actions():
         config.set(MODULE_NAME, "ENABLED"    , ( True if str(self._rhapi.db.option("obs_enabled")) == "1" else False ) ) 
         config.set(MODULE_NAME, "PRE_START"  , int(self._rhapi.db.option("obs_pre_start")) )
         config.set(MODULE_NAME, "FILENAME"   , str(self._rhapi.db.option("obs_filename")))
-        config.set(MODULE_NAME, "DIRNAME"    , str(self._rhapi.db.option("obs_dirname")))
+        #config.set(MODULE_NAME, "DIRNAME"    , str(self._rhapi.db.option("obs_dirname")))
 
         logger.info("OBS Websocks settings applied")
 
@@ -147,9 +205,8 @@ def initialize(rhapi):
     rhapi.fields.register_option(UIField('obs_password', 'Password', UIFieldType.PASSWORD), panelName)
     rhapi.fields.register_option(UIField('obs_pre_start', 'Pre start (ms)',  UIFieldType.NUMBER, value = 0), panelName)
     rhapi.fields.register_option(UIField('obs_filename', 'Filename template (optional)', UIFieldType.TEXT), panelName)
-    rhapi.fields.register_option(UIField('obs_dirname', 'Dirname template (optional)', UIFieldType.TEXT), panelName)
+    #rhapi.fields.register_option(UIField('obs_dirname', 'Dirname template (optional)', UIFieldType.TEXT), panelName)
     rhapi.fields.register_option(UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX), panelName)
-    #rhapi.fields.set_default('obs_filename', '%CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%Class-%Heat-%Round')
     UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX, options=[UIFieldSelectOption('1', 'Enabled'), UIFieldSelectOption('0', 'Disabled')])
 
     # Register Buttons in the panel
