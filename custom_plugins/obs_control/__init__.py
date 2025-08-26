@@ -74,29 +74,19 @@ class OBS_Actions():
 
     def format_name(self, template):
         """
-        Formats a name string by replacing template placeholders with race-specific values.
+        Formats a name string by replacing template placeholders with race context values.
         Args:
             template (str): The template string containing placeholders such as
-                '%heat', '%heat_id', '%class', '%class_id', and '%round'.
+                %heat, %heatId, %class, %classId, and %round.
         Returns:
-            str: The formatted string with placeholders replaced by corresponding race data.
+            str: The formatted string with placeholders replaced by actual race data.
         Placeholders:
-            %heat      - Name of the current heat.
-            %heat_id   - ID of the current heat.
-            %class     - Name of the race class.
-            %class_id  - ID of the race class.
-            %round     - Current round number or identifier.
+            %heat    - Name of the current heat (empty string if no heat).
+            %heatId  - ID of the current heat (0 if no heat).
+            %class   - Name of the race class (or "PracticeMode" if no heat).
+            %classId - ID of the race class (0 if no heat).
+            %round   - Current round number.
         """
-       
-        #RHDATA = self._rhapi.race._racecontext.rhdata
-        #heat_id = self._rhapi.race.heat
-        #Heat = RHDATA.get_heat(heat_id)
-       #heat_name = Heat.name
-        #class_id = Heat.class_id
-        #class_name = RHDATA.get_raceClass(Heat.class_id).name
-        #round = self._rhapi.race.round
-
-
         Rhdata = self._rhapi.race._racecontext.rhdata
         heat_id = self._rhapi.race.heat
         Heat = Rhdata.get_heat(heat_id)
