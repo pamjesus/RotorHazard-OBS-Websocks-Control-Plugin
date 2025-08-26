@@ -89,14 +89,12 @@ class OBS_Actions():
         """
         Rhdata = self._rhapi.race._racecontext.rhdata
         heat_id = self._rhapi.race.heat
-        Heat = Rhdata.get_heat(heat_id)
-        
-        heat_name = Heat.name
-        class_name = Rhdata.get_raceClass(Heat.class_id).name
-        class_id =  Heat.class_id
-        round_num = self._rhapi.race.round
-
-        print((heat_id, heat_name, class_id, class_name, round_num) )
+        Heat = Rhdata.get_heat(heat_id) if heat_id != 0 else None
+        heat_name = Heat.name if heat_id != 0 else ""
+        class_name = Rhdata.get_raceClass(Heat.class_id).name if heat_id != 0 else "PracticeMode"
+        class_id =  Heat.class_id if heat_id != 0 else 0
+        round_num = self._rhapi.race.round if heat_id != 0 else ""
+        #print((heat_id, heat_name, class_id, class_name, round_num) )
         
         result = (
             template.replace("%heat", heat_name)
