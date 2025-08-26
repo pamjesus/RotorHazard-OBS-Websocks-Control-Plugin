@@ -15,6 +15,9 @@ MODULE_NAME = 'OBS_WS'
 
 
 class OBS_Actions():
+    START_RECORDING  = 'obs_start_record'  # Custom event for starting recording 
+    STOP_RECORDING   = 'obs_stop_record'   # Custom event for stopping recording
+    
     def __init__(self, rhapi):
         self._rhapi = rhapi
         self.OBS = {}
@@ -103,14 +106,17 @@ class OBS_Actions():
             .replace("%classId", str(class_id))
             .replace("%round", str(round_num))
         )
-
         return result  
-        
-
-    def do_race_start(self , args=None):
-        logger.info("do_race_start")
+    
+    def do_start_recording(self, args=None):
+        logger.info("do_start_recording")
         if not self.OBS.start():
             self.emite_priority_message("OBS: Start Recording Failed")
+
+    def do_stop_recording(self, args=None):
+        logger.info("do_stop_recording")
+        if not self.OBS.stop():
+            self.emite_priority_message("OBS: Stop Recording Failed")
 
 
     def do_race_stage(self, args):
@@ -125,19 +131,17 @@ class OBS_Actions():
         #wait to before start
         while (monotonic() < args['pi_starts_at_s'] - (self.time_before_start_ms/1000)):
             gevent.sleep(0.1)
-        self.do_race_start()
+        self._rhapi.events.trigger( self.START_RECORDING, None )  # Emit custom event to start recording
 
 
     def do_race_stop(self, args):
         logger.info("do_race_stop")
-        if not self.OBS.stop():
-            self.emite_priority_message("OBS: Stop Recording Failed")
+        self._rhapi.events.trigger( self.STOP_RECORDING, None )  # Emit custom event to stop recording
         #restore obs filename formating
         self.OBS.set_filename( self.currentFilenameFormatting )
 
-
-
-    def setSettings(self, args):  
+    
+    def applySettings(self, args):  
         config = self._rhapi.config.get_all
         
         #Initialize MODULE if Needed
@@ -178,9 +182,11 @@ class OBS_Actions():
 
 def initialize(rhapi):
     obs = OBS_Actions(rhapi)
-    rhapi.events.on(Evt.STARTUP    , obs.do_ObsInitialize_fn  , default_args=None, priority=101, unique=True, name=MODULE_NAME)
-    rhapi.events.on(Evt.RACE_STOP  , obs.do_race_stop         , default_args=None, priority=101, unique=True, name=MODULE_NAME)
-    rhapi.events.on(Evt.RACE_STAGE , obs.do_race_stage        , default_args=None, priority=101, unique=True, name=MODULE_NAME)
+    rhapi.events.on(Evt.STARTUP         , obs.do_ObsInitialize_fn  , default_args=None, priority=101, unique=True, name=MODULE_NAME)
+    rhapi.events.on(Evt.RACE_STOP       , obs.do_race_stop         , default_args=None, priority=101, unique=True, name=MODULE_NAME)
+    rhapi.events.on(Evt.RACE_STAGE      , obs.do_race_stage        , default_args=None, priority=101, unique=True, name=MODULE_NAME)
+    rhapi.events.on(obs.START_RECORDING , obs.do_start_recording   , default_args=None, priority=101, unique=True, name=MODULE_NAME)
+    rhapi.events.on(obs.STOP_RECORDING  , obs.do_stop_recording    , default_args=None, priority=101, unique=True, name=MODULE_NAME)
  
     panelName = MODULE_NAME + 'options'
     rhapi.ui.register_panel( panelName, MODULE_NAME + ' Actions', 'settings', order=0)
@@ -193,7 +199,7 @@ def initialize(rhapi):
     UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX, options=[UIFieldSelectOption('1', 'Enabled'), UIFieldSelectOption('0', 'Disabled')])
 
     # Register Buttons in the panel
-    rhapi.ui.register_quickbutton(panelName, 'generate_connectin_file', 'Apply Connection Settings', obs.setSettings)
+    rhapi.ui.register_quickbutton(panelName, 'generate_connectin_file', 'Apply Connection Settings', obs.applySettings)
     rhapi.ui.register_quickbutton(panelName, 'connect_to_obs', 'Connect to OBS Server', obs.do_ObsInitialize_fn)
     rhapi.ui.register_quickbutton(panelName, 'disconnect_from_obs', 'Disconnect from OBS Server', obs.disconnectFromOBS)
 
