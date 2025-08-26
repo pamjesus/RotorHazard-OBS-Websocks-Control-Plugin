@@ -153,7 +153,6 @@ class OBS_Actions():
         config.set(MODULE_NAME, "ENABLED"    , ( True if str(self._rhapi.db.option("obs_enabled")) == "1" else False ) ) 
         config.set(MODULE_NAME, "PRE_START"  , int(self._rhapi.db.option("obs_pre_start")) )
         config.set(MODULE_NAME, "FILENAME"   , str(self._rhapi.db.option("obs_filename")))
-        #config.set(MODULE_NAME, "DIRNAME"    , str(self._rhapi.db.option("obs_dirname")))
 
         logger.info("OBS Websocks settings applied")
 
@@ -167,9 +166,6 @@ class OBS_Actions():
                 logger.info("OBS: Connected to OBS server")
             else:
                 logger.info("OBS: Connected to OBS server")
-
-
-
 
     def disconnectFromOBS(self, args):
         if self.OBS and isinstance(self.OBS, OBSManager):
@@ -193,7 +189,6 @@ def initialize(rhapi):
     rhapi.fields.register_option(UIField('obs_password', 'Password', UIFieldType.PASSWORD), panelName)
     rhapi.fields.register_option(UIField('obs_pre_start', 'Pre start (ms)',  UIFieldType.NUMBER, value = 0), panelName)
     rhapi.fields.register_option(UIField('obs_filename', 'Filename template (optional)', UIFieldType.TEXT), panelName)
-    #rhapi.fields.register_option(UIField('obs_dirname', 'Dirname template (optional)', UIFieldType.TEXT), panelName)
     rhapi.fields.register_option(UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX), panelName)
     UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX, options=[UIFieldSelectOption('1', 'Enabled'), UIFieldSelectOption('0', 'Disabled')])
 
