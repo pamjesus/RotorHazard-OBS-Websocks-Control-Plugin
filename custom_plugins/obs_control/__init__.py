@@ -37,21 +37,6 @@ class OBS_Actions():
         self.OBS = NoOBSManager()
 
         config = self._rhapi.config.get_all
-        if config and not MODULE_NAME in set(config):
-            ######## REGISTER MODULE #########  TOOD: move to UI
-            api_config = self._rhapi.config
-            api_config.register_section(MODULE_NAME)
-            api_config.set(MODULE_NAME, "HOST", "localhost")
-            api_config.set(MODULE_NAME, "PORT", 4455)
-            api_config.set(MODULE_NAME, "PASSWORD", "YourPassword")
-            api_config.set(MODULE_NAME, "ENABLED", False)  
-            api_config.set(MODULE_NAME, "PRE_START", 1000) 
-            api_config.set(MODULE_NAME, "FILENAME", "%CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%Class-%Heat-%Round")
-            #api_config.set(MODULE_NAME, "DIRNAME", "")
-            #################################
-            logger.info("Module "+MODULE_NAME+"inicializado")
-
-        config = self._rhapi.config.get_all
         if  config and MODULE_NAME in config:
             module_conf = config[MODULE_NAME] 
             if      'HOST' in module_conf      \
@@ -141,36 +126,6 @@ class OBS_Actions():
         self.OBS.set_filename( self.currentFilenameFormatting )
 
     
-    def applySettings(self, args):  
-        config = self._rhapi.config.get_all
-        
-        #Initialize MODULE if Needed
-        if not config[MODULE_NAME]:
-            config.register_section(MODULE_NAME)
-            logger.info("Module inicializado")
-
-        #Apply setthings to RHAPI Config
-        config = self._rhapi.config
-        config.set(MODULE_NAME, "HOST"       , self._rhapi.db.option("obs_hostname"))
-        config.set(MODULE_NAME, "PORT"       , int(self._rhapi.db.option("obs_port")) )
-        config.set(MODULE_NAME, "PASSWORD"   , self._rhapi.db.option("obs_password") )
-        config.set(MODULE_NAME, "ENABLED"    , ( True if str(self._rhapi.db.option("obs_enabled")) == "1" else False ) ) 
-        config.set(MODULE_NAME, "PRE_START"  , int(self._rhapi.db.option("obs_pre_start")) )
-        config.set(MODULE_NAME, "FILENAME"   , str(self._rhapi.db.option("obs_filename")))
-
-        logger.info("OBS Websocks settings applied")
-
-        if config.get(MODULE_NAME, "ENABLED") == False and isinstance(self.OBS, OBSManager):
-            self.disconnectFromOBS(None)
-        
-        if config.get(MODULE_NAME, "ENABLED") == True and isinstance(self.OBS, NoOBSManager):
-            self.do_ObsInitialize_fn(None)
-            if isinstance(self.OBS, NoOBSManager):
-                self.emite_priority_message("OBS: Error connecting to OBS server", True)
-                logger.info("OBS: Connected to OBS server")
-            else:
-                logger.info("OBS: Connected to OBS server")
-
     def disconnectFromOBS(self, args):
         if self.OBS and isinstance(self.OBS, OBSManager):
             self.OBS.disconnect()
@@ -182,25 +137,26 @@ class OBS_Actions():
 
 def initialize(rhapi):
     obs = OBS_Actions(rhapi)
+
+    panelName = MODULE_NAME + 'options'
+    rhapi.config.register_section(MODULE_NAME)
+    rhapi.ui.register_panel( panelName, MODULE_NAME + ' Actions', 'settings', order=0)
+    
+    # Register to events
     rhapi.events.on(Evt.STARTUP         , obs.do_ObsInitialize_fn  , default_args=None, priority=101, unique=True, name=MODULE_NAME)
     rhapi.events.on(Evt.RACE_STOP       , obs.do_race_stop         , default_args=None, priority=101, unique=True, name=MODULE_NAME)
     rhapi.events.on(Evt.RACE_STAGE      , obs.do_race_stage        , default_args=None, priority=101, unique=True, name=MODULE_NAME)
     rhapi.events.on(obs.START_RECORDING , obs.do_start_recording   , default_args=None, priority=101, unique=True, name=MODULE_NAME)
     rhapi.events.on(obs.STOP_RECORDING  , obs.do_stop_recording    , default_args=None, priority=101, unique=True, name=MODULE_NAME)
- 
-    panelName = MODULE_NAME + 'options'
-    rhapi.ui.register_panel( panelName, MODULE_NAME + ' Actions', 'settings', order=0)
-    rhapi.fields.register_option(UIField('obs_hostname', 'OBS IP', UIFieldType.TEXT), panelName)
-    rhapi.fields.register_option(UIField('obs_port', 'Port', UIFieldType.NUMBER, value=4455), panelName)
-    rhapi.fields.register_option(UIField('obs_password', 'Password', UIFieldType.PASSWORD), panelName)
-    rhapi.fields.register_option(UIField('obs_pre_start', 'Pre start (ms)',  UIFieldType.NUMBER, value = 0), panelName)
-    rhapi.fields.register_option(UIField('obs_filename', 'Filename template (optional)', UIFieldType.TEXT), panelName)
-    rhapi.fields.register_option(UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX), panelName)
-    UIField('obs_enabled', 'Enable OBS Actions', UIFieldType.CHECKBOX, options=[UIFieldSelectOption('1', 'Enabled'), UIFieldSelectOption('0', 'Disabled')])
 
     # Register Buttons in the panel
-    rhapi.ui.register_quickbutton(panelName, 'generate_connectin_file', 'Apply Connection Settings', obs.applySettings)
     rhapi.ui.register_quickbutton(panelName, 'connect_to_obs', 'Connect to OBS Server', obs.do_ObsInitialize_fn)
     rhapi.ui.register_quickbutton(panelName, 'disconnect_from_obs', 'Disconnect from OBS Server', obs.disconnectFromOBS)
-
-  
+    
+    # Register configuration options
+    rhapi.fields.register_option(UIField('HOST', 'OBS IP', UIFieldType.TEXT, persistent_section=MODULE_NAME, value = "localhost"), panelName)
+    rhapi.fields.register_option(UIField('PORT', 'Port', UIFieldType.NUMBER, persistent_section=MODULE_NAME, value = 4455), panelName)
+    rhapi.fields.register_option(UIField('PASSWORD', 'Password', UIFieldType.PASSWORD, persistent_section=MODULE_NAME, value="YourPassword"), panelName)
+    rhapi.fields.register_option(UIField('PRE_START', 'Pre start (ms)',  UIFieldType.NUMBER, persistent_section=MODULE_NAME, value = 1000), panelName)
+    rhapi.fields.register_option(UIField('FILENAME', 'Filename template (optional)', UIFieldType.TEXT, persistent_section=MODULE_NAME, value = "%CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round"), panelName)
+    rhapi.fields.register_option(UIField('ENABLED', 'Enable OBS Actions', UIFieldType.CHECKBOX, persistent_section=MODULE_NAME, value = False), panelName)
