@@ -34,7 +34,7 @@ class OBSManager():
     def connect(self):
         try:
             logger.info("OBS: (Re)connecting...")
-            self.rc = obs.ReqClient(host=self.config['HOST'], port=self.config['PORT'], password=self.config['PASSWORD'])        
+            self.rc = obs.ReqClient(host=self.config['HOST'], port=self.config['PORT'], password=self.config['PASSWORD'], timeout=5)        
         except:
             logger.error("OBS: Error connecting to configured instance")
 
