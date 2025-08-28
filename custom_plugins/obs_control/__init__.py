@@ -23,42 +23,34 @@ class OBS_Actions():
         self.OBS = {}
         self.time_before_start_ms = 0
         
-
     def emite_priority_message(self, message, interrupt = False):
         if interrupt:
             self._rhapi.ui.message_alert(message)
         else:
             self._rhapi.ui.message_alert(message)
 
-
     def do_ObsInitialize_fn(self, args):
         logger.info("def do_ObsInitialize_fn" )
         global MODULE_NAME
         self.OBS = NoOBSManager()
-
-        config = self._rhapi.config.get_all
-        if  config and MODULE_NAME in config:
-            module_conf = config[MODULE_NAME] 
-            if      'HOST' in module_conf      \
-                and 'PORT' in module_conf      \
-                and 'PASSWORD' in module_conf  \
-                and 'ENABLED' in module_conf   \
-                and module_conf['ENABLED'] == True:
-                try:
-                    self.OBS = OBSManager(config=module_conf)
-                except:
-                    logger.error("OBS: Error connecting to OBS server")
-                    self.OBS = NoOBSManager()
-                    self.emite_priority_message('Error conneting OBS server', True)
-            else:
-                self.OBS = NoOBSManager()
-
-            if 'PRE_START' in module_conf:
-                t_ms = self._rhapi.config.get(section=MODULE_NAME, name='PRE_START', as_int=True)
-                self.time_before_start_ms = t_ms if t_ms >=0 else 0
+        obs_enabled = self._rhapi.config.get(MODULE_NAME, 'ENABLED')
+        t_ms = self._rhapi.config.get(section=MODULE_NAME, name='PRE_START', as_int=True)
+        self.time_before_start_ms = t_ms if t_ms >=0 else 0
         
-        logger.info("do_ObsInitialize_fn DONE" + ", current instance of " + type(self.OBS).__name__)
+        if not obs_enabled: 
+            logger.info("OBS Actions not enabled")
+            self.OBS = NoOBSManager() 
+        if obs_enabled:
+            module_conf = self._rhapi.config.get_all[MODULE_NAME]
+            try:
+                self.OBS = OBSManager(config=module_conf)
+                logger.info("Connected to OBS server")
+            except:                    
+                logger.error("Error connecting to OBS server")
+                self.OBS = NoOBSManager()
+                self.emite_priority_message('Error conneting OBS server', True)
 
+        logger.info("do_ObsInitialize_fn DONE" + ", current instance of " + type(self.OBS).__name__)
 
     def format_name(self, template):
         """
