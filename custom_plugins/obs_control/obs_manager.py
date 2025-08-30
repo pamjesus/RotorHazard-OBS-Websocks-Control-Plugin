@@ -34,9 +34,14 @@ class OBSManager():
     def connect(self):
         try:
             logger.info("OBS: (Re)connecting...")
-            self.rc = obs.ReqClient(host=self.config['HOST'], port=self.config['PORT'], password=self.config['PASSWORD'], timeout=5)        
-        except:
+            self.rc = obs.ReqClient(host=self.config['HOST'], port=self.config['PORT'], password=self.config['PASSWORD'], timeout=5)
+            version_info = self.rc.get_version()
+            self.obs_version = version_info.obs_version
+            self.obs_web_socket_version = version_info.obs_web_socket_version   
+            logger.info(f"OBS: Connected to configured instance. Obs-websocket Version: {self.obs_web_socket_version}, OBS Studio Version: {self.obs_version}")
+        except Exception as e:
             logger.error("OBS: Error connecting to configured instance")
+            logger.error( e )
 
     def disconnect(self):
         try:
