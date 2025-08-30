@@ -29,6 +29,14 @@ class OBS_Actions():
         else:
             self._rhapi.ui.message_alert(message)
 
+    def disconectIfConnected(self):
+        if self.OBS and isinstance(self.OBS, OBSManager):
+            self.OBS.disconnect()
+            self.OBS = NoOBSManager()
+            logger.info("Disconnected from OBS server")
+            return
+
+
     def do_ObsInitialize_fn(self, args):
         logger.info("def do_ObsInitialize_fn" )
         global MODULE_NAME
@@ -117,14 +125,24 @@ class OBS_Actions():
         #restore obs filename formating
         self.OBS.set_filename( self.currentFilenameFormatting )
 
-    
-    def disconnectFromOBS(self, args):
+
+    def button_ConnectToOBS(self, args):
+        if self.OBS and isinstance(self.OBS, OBSManager):
+            logger.info("Already connected to OBS server")
+            return
+        elif self.OBS and isinstance(self.OBS, NoOBSManager) and not self._rhapi.config.get(MODULE_NAME, 'ENABLED'):
+            logger.info("Nothing to do, OBS Actions not enabled")
+            return
+        self.do_ObsInitialize_fn(None)
+
+    def button_DisconnectFromOBS(self, args):
         if self.OBS and isinstance(self.OBS, OBSManager):
             self.OBS.disconnect()
             self.OBS = NoOBSManager()
             logger.info("Disconnected from OBS server")
-            return
-        logger.info("Not connected to OBS server")
+        else:
+            logger.info("Not connected to OBS server")
+        logger.info("Disconnect DONE" + ", current instance of " + type(self.OBS).__name__)
         
 
 def initialize(rhapi):
@@ -142,8 +160,8 @@ def initialize(rhapi):
     rhapi.events.on(obs.STOP_RECORDING  , obs.do_stop_recording    , default_args=None, priority=101, unique=True, name=MODULE_NAME)
 
     # Register Buttons in the panel
-    rhapi.ui.register_quickbutton(panelName, 'connect_to_obs', 'Connect to OBS Server', obs.do_ObsInitialize_fn)
-    rhapi.ui.register_quickbutton(panelName, 'disconnect_from_obs', 'Disconnect from OBS Server', obs.disconnectFromOBS)
+    rhapi.ui.register_quickbutton(panelName, 'connect_to_obs', 'Connect to OBS Server', obs.button_ConnectToOBS)
+    rhapi.ui.register_quickbutton(panelName, 'disconnect_from_obs', 'Disconnect from OBS Server', obs.button_DisconnectFromOBS)
     
     # Register configuration options
     rhapi.fields.register_option(UIField('HOST', 'OBS IP', UIFieldType.TEXT, persistent_section=MODULE_NAME, value = "localhost"), panelName)
