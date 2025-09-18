@@ -53,6 +53,12 @@ The plug-in adds custom Rotorhazard placeholders to the ones used by OBS:
  * %classId
  * %heatId
 
+Sample configs for filename: 
+ - %CCYY%MM%DD_%class-%heat-%round
+ - %CCYY%MM%DD/%heat-%round ( Includes creation of directory )
+ - %CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round
+
+
 This plug-in can be active/inactive by setting the parameter ENABLED accordingly.
 
 Note: The enabled checkbox is failing to reflect the real status of the ENABLED parameter. The situation is identified, and the correction can be tracked at the issue [RH1073](https://github.com/RotorHazard/RotorHazard/issues/1073).
