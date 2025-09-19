@@ -267,7 +267,7 @@ def initialize(rhapi):
             "Filename template (optional)",
             UIFieldType.TEXT,
             persistent_section=MODULE_NAME,
-            value="%CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round",
+            value="%CCYY%MM%DD_%class-%heat-%round",
         ),
         panelName,
     )
