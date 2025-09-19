@@ -1,0 +1,13 @@
+{
+	"domain": "obs_control",
+	"name": "OBS Websocks Control",
+	"author": "Paulo AM Jesus",
+	"author_uri": "https://github.com/PAMJesus",
+	"description": "This system allows RotorHazard to communicate to OBS Studio video application and control the video remotely.",
+	"required_rhapi_version": "1.3",
+	"version": "1.3.0-beta.1",
+	"documentation_uri": "https://github.com/PAMJesus/RotorHazard-OBS-Websocks-Control-Plugin",
+	"dependencies" : ["obsws-python","monotonic"],
+	"license" : "MIT",
+	"license_uri":"https://github.com/pamjesus/RotorHazard-OBS-Websocks-Control-Plugin/blob/main/LICENSE"
+  }

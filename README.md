@@ -4,60 +4,70 @@ This system allows RotorHazard to communicate to [OBS Studio](https://obsproject
 This software is distributed as a plugin to be added to the RotorHazard.
 
 ## Features
-* Start/Stop OBS recording at every race.
-* Star recording before race starts (parameter in milliseconds).
-* Restart connection to OBS in case of a failed call to the Webservice.
+* OBS customized filename saving. Sample filename Template: "%CCYY%MM%DD/%class-%heat-%round"
+* Start recording before the race starts, for (parameter in milliseconds) 
+* Restart the connection to OBS in case of a failed call to the Webservice.
 * A start/stop recording failure raises a high-priority message in the front end.
 
+## Also
+ * Not required to restart the RH/Raspberry Pi
+ * Retro compatibility to WebSocket API v4.(by the docs)
+
+## Tested on:
+ * Obs-websocket Version: 5.5.6, OBS Studio Version: 31.0.3
+ * OBS WebSocket Version: 5.4.2, OBS Studio Version: 30.1.0
+ * OBS WebSocket Version: 5.0.1, OBS Studio Version: 27.2.4
+
 ## USE CASES
-* Control OBS Studio to save race video.
+* Control OBS Studio to save the race video.
 * Start recording before the race ( helps detect false starts )
-* Record Video on multiple machines simultaneously. To bypass machine limitations.  (TODO)
+
 
 ## Compatibility chart
-Obs Control PlugIn | Rotor Hazard  | OBS Studio
---- | --- | ---
-1.0.x | 3.2.x |  >= 27.2.4
-2.0.x | 4.x.x |  >= 27.2.4
-
-PlugIn version 2.0 will be available after the release of RotorHazard 4.x. Until then, is available at the branch 2.0 of this git repository.
-
+The current version requires  RHAPI 1.3 fowerd, starting at RotorHazard versions 4.3.1
 
 ## Installation and Setup
 
-The system comprises a RotoHazard plugin and a software OBS studio for video recording.
+The system comprises a RotoHazard plugin and the OBS Studio software for video recording.
 
 ### Install Plugin
 
-The current version requires RotorHazard verions 3.2.x.
+The recommended method for installation is through the RH UI, specifically the Plug-Ins page. 
 
-Copy the `obs_control` plugin into the `src/server/plugins` directory in your RotorHazard install.
 
+Manual installation, at the files level, can be achieved by copying the `obs_control` plugin into the custom `plugins` directory in your RotorHazard.
 Install dependencies. File available inside the plugin directory.
-
 ```
     pip install -r .\requirements.txt
 ```
-
 ### Configure Plugin
 
-In RotorHazard's `config.json` file, add the following section.
+The configuration must now be done through the UI. The data is persisted in the `config.json` file.
 
-```
-"OBS_WS": {
-	"ENABLED": true,
-	"HOST": "127.0.0.1",
-	"PORT": 4444,
-	"PASSWORD": "YourPassword",
-	"PRE_START": 2000
-  }
-```
+Set your OBS parameters like IP, port, password, and file name template.
 
-Set your OBS parameters like IP, port, and password.
+The plug-in adds custom Rotorhazard placeholders to the ones used by OBS:
+ * %class
+ * %heat
+ * %round
+ * %classId
+ * %heatId
+
+Sample configs for filename: 
+ - %CCYY%MM%DD_%class-%heat-%round
+ - %CCYY%MM%DD/%heat-%round ( Includes creation of directory )
+ - %CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round
+
 
 This plug-in can be active/inactive by setting the parameter ENABLED accordingly.
 
-The recording can be activated before the race starts by setting the parameter PRE_START with int value (milliseconds) to the start. Note the waiting is done in intervals of 0,1 seconds (100 ms).
+Note: The enabled checkbox is failing to reflect the real status of the ENABLED parameter. The situation is identified, and the correction can be tracked at the issue [RH1073](https://github.com/RotorHazard/RotorHazard/issues/1073).
+
+The recording can be activated before the race starts by setting the parameter PRE_START with an int value (milliseconds) to the start. Note that the waiting is done in intervals of 0,1 seconds (100 ms).
+
+### TroubleShoot
+
+* When in doubt, refresh the connection by resetting the checkbox, followed by the buttons Disable and Connect.
 
 
 ### On the OBS app
