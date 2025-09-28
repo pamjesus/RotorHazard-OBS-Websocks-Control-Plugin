@@ -75,6 +75,7 @@ class OBS_Actions:
         Returns:
             str: The formatted string with placeholders replaced by actual race data.
         Placeholders:
+            %eventName - Name of the event.
             %heat    - Name of the current heat (empty string if no heat).
             %heatId  - ID of the current heat (0 if no heat).
             %class   - Name of the race class (or "PracticeMode" if no heat).
@@ -91,9 +92,11 @@ class OBS_Actions:
         class_id = Heat.class_id if heat_id != 0 else 0
         round_num = self._rhapi.race.round if heat_id != 0 else ""
         # print((heat_id, heat_name, class_id, class_name, round_num) )
+        eventName = Rhdata.get_option("eventName")
 
         result = (
             template.replace("%heat", heat_name)
+            .replace("%eventName", str(eventName))
             .replace("%heatId", str(heat_id))
             .replace("%class", class_name)
             .replace("%classId", str(class_id))

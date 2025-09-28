@@ -52,10 +52,12 @@ The plug-in adds custom Rotorhazard placeholders to the ones used by OBS:
  * %round
  * %classId
  * %heatId
+ * %eventName
 
 Sample configs for filename: 
  - %CCYY%MM%DD_%class-%heat-%round
  - %CCYY%MM%DD/%heat-%round ( Includes creation of directory )
+ - %eventName/%CCYY%MM%DD/%heat-%round ( Includes creation of directory )
  - %CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round
 
 
