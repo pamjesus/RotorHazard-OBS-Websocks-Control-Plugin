@@ -18,11 +18,11 @@ MODULE_NAME = "OBS_WS"
 class OBS_Actions:
     START_RECORDING = "obs_start_record"  # Custom event for starting recording
     STOP_RECORDING = "obs_stop_record"  # Custom event for stopping recording
+    currentFilenameFormatting = None
 
     def __init__(self, rhapi):
         self._rhapi = rhapi
         self.OBS = {}
-        self.time_before_start_ms = 0
 
     def emite_priority_message(self, message, interrupt=False):
         if interrupt:
@@ -42,10 +42,6 @@ class OBS_Actions:
         global MODULE_NAME
         self.OBS = NoOBSManager()
         obs_enabled = self._rhapi.config.get(MODULE_NAME, "ENABLED")
-        t_ms = self._rhapi.config.get(
-            section=MODULE_NAME, name="PRE_START", as_int=True
-        )
-        self.time_before_start_ms = t_ms if t_ms >= 0 else 0
 
         if not obs_enabled:
             logger.info("OBS Actions not enabled")
@@ -114,6 +110,12 @@ class OBS_Actions:
         if not self.OBS.stop():
             self.emite_priority_message("OBS: Stop Recording Failed")
 
+    def read_time_before_start_ms(self):
+        t_ms = self._rhapi.config.get(
+            section=MODULE_NAME, name="PRE_START", as_int=True
+        )
+        return t_ms if t_ms >= 0 else 0
+
     def do_race_stage(self, args):
         logger.info("do_race_stage")
 
@@ -123,8 +125,11 @@ class OBS_Actions:
         rh_filename = self.format_name(filename_base)
         self.OBS.set_filename(rh_filename)
 
+        t_ms = 0
+        t_ms = self.read_time_before_start_ms()
+
         # wait to before start
-        while monotonic() < args["pi_starts_at_s"] - (self.time_before_start_ms / 1000):
+        while monotonic() < args["pi_starts_at_s"] - (t_ms / 1000):
             gevent.sleep(0.1)
         self._rhapi.events.trigger(
             self.START_RECORDING, None
@@ -136,7 +141,8 @@ class OBS_Actions:
             self.STOP_RECORDING, None
         )  # Emit custom event to stop recording
         # restore obs filename formating
-        self.OBS.set_filename(self.currentFilenameFormatting)
+        if self.currentFilenameFormatting is not None:
+            self.OBS.set_filename(self.currentFilenameFormatting)
 
     def button_ConnectToOBS(self, args):
         if self.OBS and isinstance(self.OBS, OBSManager):
