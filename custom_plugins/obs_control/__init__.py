@@ -188,6 +188,14 @@ def initialize(rhapi):
         name=MODULE_NAME,
     )
     rhapi.events.on(
+        Evt.LAPS_CLEAR,
+        obs.do_race_stop,
+        default_args=None,
+        priority=101,
+        unique=True,
+        name=MODULE_NAME,
+    )
+    rhapi.events.on(
         Evt.RACE_STAGE,
         obs.do_race_stage,
         default_args=None,
