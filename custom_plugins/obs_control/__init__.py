@@ -214,11 +214,14 @@ def initialize(rhapi):
 
     # Register Buttons in the panel
     rhapi.ui.register_quickbutton(
-        panelName, "connect_to_obs", "Connect to OBS Server", obs.button_ConnectToOBS
+        panelName,
+        MODULE_NAME + "connect_to_obs",
+        "Connect to OBS Server",
+        obs.button_ConnectToOBS,
     )
     rhapi.ui.register_quickbutton(
         panelName,
-        "disconnect_from_obs",
+        MODULE_NAME + "disconnect_from_obs",
         "Disconnect from OBS Server",
         obs.button_DisconnectFromOBS,
     )
