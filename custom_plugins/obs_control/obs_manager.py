@@ -76,13 +76,20 @@ class OBSManager:
 
     def stop(self):
         try:
-            self.rc.stop_record()
-            logger.info("OBS: Recording Stoppped")
+            if self.rc is None:
+                return True
+
+            RStatus = self.rc.get_record_status()  # retuns GetRecordStatusDataclass
+            if RStatus.output_active is True:
+                self.rc.stop_record()
+                logger.info("OBS: Recording Stoppped")
         except:
             self.connect()
             try:
-                self.rc.stop_record()
-                logger.info("OBS: Recording Stoppped")
+                RStatus = self.rc.get_record_status()  # retuns GetRecordStatusDataclass
+                if RStatus.output_active is True:
+                    self.rc.stop_record()
+                    logger.info("OBS: Recording Stoppped")
             except:
                 logger.error("OBS: Stop Recording Failed")
                 return False
