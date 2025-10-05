@@ -81,7 +81,7 @@ class OBS_Actions:
         Rhdata = self._rhapi.race._racecontext.rhdata
         heat_id = self._rhapi.race.heat
         Heat = Rhdata.get_heat(heat_id) if heat_id != 0 else None
-        heat_name = Heat.name if heat_id != 0 else ""
+        heat_name = Heat.name if heat_id != 0 and Heat.name is not None else ""
         class_name = (
             Rhdata.get_raceClass(Heat.class_id).name if heat_id != 0 else "PracticeMode"
         )
