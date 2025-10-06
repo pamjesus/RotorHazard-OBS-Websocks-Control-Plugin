@@ -18,7 +18,6 @@ MODULE_NAME = "OBS_WS"
 class OBS_Actions:
     START_RECORDING = "obs_start_record"  # Custom event for starting recording
     STOP_RECORDING = "obs_stop_record"  # Custom event for stopping recording
-    currentFilenameFormatting = None
 
     def __init__(self, rhapi):
         self._rhapi = rhapi
@@ -62,43 +61,48 @@ class OBS_Actions:
             + type(self.OBS).__name__
         )
 
-    def format_name(self, template):
+    def format_name(self, template: str) -> str:
         """
-        Formats a name string by replacing template placeholders with race context values.
-        Args:
-            template (str): The template string containing placeholders such as
-                %heat, %heatId, %class, %classId, and %round.
-        Returns:
-            str: The formatted string with placeholders replaced by actual race data.
-        Placeholders:
-            %eventName - Name of the event.
-            %heat    - Name of the current heat (empty string if no heat).
-            %heatId  - ID of the current heat (0 if no heat).
-            %class   - Name of the race class (or "PracticeMode" if no heat).
-            %classId - ID of the race class (0 if no heat).
-            %round   - Current round number.
-        """
-        Rhdata = self._rhapi.race._racecontext.rhdata
-        heat_id = self._rhapi.race.heat
-        Heat = Rhdata.get_heat(heat_id) if heat_id != 0 else None
-        heat_name = Heat.name if heat_id != 0 and Heat.name is not None else ""
-        class_name = (
-            Rhdata.get_raceClass(Heat.class_id).name if heat_id != 0 else "PracticeMode"
-        )
-        class_id = Heat.class_id if heat_id != 0 else 0
-        round_num = self._rhapi.race.round if heat_id != 0 else ""
-        # print((heat_id, heat_name, class_id, class_name, round_num) )
-        eventName = Rhdata.get_option("eventName")
+        Replace placeholders in `template` with race context values.
 
-        result = (
-            template.replace("%heat", heat_name)
-            .replace("%eventName", str(eventName))
-            .replace("%heatId", str(heat_id))
-            .replace("%class", class_name)
-            .replace("%classId", str(class_id))
-            .replace("%round", str(round_num))
-        )
-        return result
+        Supported placeholders:
+            %eventName - Name of the event
+            %heat      - Current heat name (or "PracticeMode" if none)
+            %heatId    - ID of the current heat (0 if none)
+            %class     - Race class name ("UNCLASSIFIED", "PracticeMode", or real class name)
+            %classId   - Race class ID (0 if none)
+            %round     - Current round number (empty if none)
+        """
+        rhdata = self._rhapi.race._racecontext.rhdata
+        heat_id = self._rhapi.race.heat
+        heat = rhdata.get_heat(heat_id) if heat_id else None
+
+        round_num = self._rhapi.race.round if heat_id else ""
+        event_name = rhdata.get_option("eventName")
+
+        if not heat:
+            heat_name, class_name, class_id = "PracticeMode", "", round_num
+        else:
+            heat_name = heat.display_name
+            class_id = heat.class_id
+            if class_id:
+                class_name = rhdata.get_raceClass(class_id).name
+            else:
+                class_name = "UNCLASSIFIED"
+
+        placeholders = {
+            "%eventName": str(event_name),
+            "%heat": heat_name,
+            "%heatId": str(heat_id),
+            "%class": class_name,
+            "%classId": str(class_id),
+            "%round": str(round_num),
+        }
+
+        for key, val in placeholders.items():
+            template = template.replace(key, val)
+
+        return template
 
     def do_start_recording(self, args=None):
         logger.info("do_start_recording")
@@ -120,9 +124,8 @@ class OBS_Actions:
         logger.info("do_race_stage")
 
         # prepare OBS filename, inject RH data
-        self.currentFilenameFormatting = self.OBS.get_current_filename()
-        filename_base = self._rhapi.config.get(MODULE_NAME, "FILENAME")
-        rh_filename = self.format_name(filename_base)
+        filename_template = self._rhapi.config.get(MODULE_NAME, "FILENAME")
+        rh_filename = self.format_name(filename_template)
         self.OBS.set_filename(rh_filename)
 
         t_ms = 0
@@ -131,18 +134,14 @@ class OBS_Actions:
         # wait to before start
         while monotonic() < args["pi_starts_at_s"] - (t_ms / 1000):
             gevent.sleep(0.1)
-        self._rhapi.events.trigger(
-            self.START_RECORDING, None
-        )  # Emit custom event to start recording
+        self._rhapi.events.trigger(self.START_RECORDING, None)
 
     def do_race_stop(self, args):
-        logger.info("do_race_stop")
-        self._rhapi.events.trigger(
-            self.STOP_RECORDING, None
-        )  # Emit custom event to stop recording
-        # restore obs filename formating
-        if self.currentFilenameFormatting is not None:
-            self.OBS.set_filename(self.currentFilenameFormatting)
+        if self.OBS:
+            logger.info("do_race_stop")
+            self._rhapi.events.trigger(self.STOP_RECORDING, None)
+            # restore obs filename formating
+            self.OBS.rollback_filename()
 
     def button_ConnectToOBS(self, args):
         if self.OBS and isinstance(self.OBS, OBSManager):

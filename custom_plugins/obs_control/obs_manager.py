@@ -20,13 +20,16 @@ class NoOBSManager:
     def set_filename(self, fmt):
         return True
 
-    def get_current_filename(self):
+    def rollback_filename(self):
         return True
 
 
 class OBSManager:
     rc = None
     config = {}
+    obs_version = None
+    obs_web_socket_version = None
+    obs_filename_base = None
 
     def __init__(self, config):
         self.config = config
@@ -44,6 +47,7 @@ class OBSManager:
             version_info = self.rc.get_version()
             self.obs_version = version_info.obs_version
             self.obs_web_socket_version = version_info.obs_web_socket_version
+            self.obs_filename_base = self._get_current_filename()
             logger.info(
                 f"OBS: Connected to configured instance. Obs-websocket Version: {self.obs_web_socket_version}, OBS Studio Version: {self.obs_version}"
             )
@@ -95,33 +99,41 @@ class OBSManager:
                 return False
         return True
 
-    def set_filename(self, fmt):
+    def _apply_filename(self, fmt):
         try:
             self.rc.set_profile_parameter("Output", "FilenameFormatting", fmt)
-            logger.info("OBS: Filename formatting set to " + fmt)
         except:
             self.connect()
             try:
                 self.rc.set_profile_parameter("Output", "FilenameFormatting", fmt)
-                logger.info("OBS: Filename formatting set to " + fmt)
             except:
-                logger.error("OBS: Setting Filename formatting Failed")
                 return False
         return True
 
-    def get_current_filename(self):
+    def set_filename(self, fmt):
+        if self._apply_filename(fmt):
+            logger.info("OBS: Filename formatting set to" + fmt)
+            return True
+        else:
+            logger.error("OBS: Setting Filename formatting Failed")
+            return False
+
+    def rollback_filename(self):
+        file_name = self.obs_filename_base
+        if self._apply_filename(file_name):
+            logger.info("OBS: Filename formatting rolled back to " + file_name)
+            return True
+        else:
+            logger.error("OBS: Rolling back Filename formatting Failed")
+            return False
+
+    def _get_current_filename(self):
         try:
             # Saves the OLD formating
             resp = self.rc.get_profile_parameter("Output", "FilenameFormatting")
             currentFilenameFormatting = resp.parameter_value
             return currentFilenameFormatting
         except:
-            self.connect()
-            try:
-                resp = self.rc.get_profile_parameter("Output", "FilenameFormatting")
-                currentFilenameFormatting = resp.parameter_value
-                return currentFilenameFormatting
-            except:
-                logger.error("OBS: Getting Filename formatting Failed")
-                return ""
+            logger.error("OBS: Getting Filename formatting Failed")
+            return "%CCYY%MM%DD"  # OBS default
         return ""
