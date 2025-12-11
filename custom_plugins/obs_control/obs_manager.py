@@ -35,6 +35,7 @@ class OBSManager:
         self.config = config
         self.connect()
 
+    # secundary connection method for reconnecting if the connection is lost
     def connect(self):
         try:
             logger.info("OBS: (Re)connecting...")
@@ -52,8 +53,7 @@ class OBSManager:
                 f"OBS: Connected to configured instance. Obs-websocket Version: {self.obs_web_socket_version}, OBS Studio Version: {self.obs_version}"
             )
         except Exception as e:
-            logger.error("OBS: Error connecting to configured instance")
-            logger.error(e)
+            logger.warning("OBS: Error connecting to configured instance: %s", str(e))
 
     def disconnect(self):
         try:
@@ -73,8 +73,8 @@ class OBSManager:
             try:
                 self.rc.start_record()
                 logger.info("OBS: Recording Started")
-            except:
-                logger.error("OBS: Start Recording Failed")
+            except Exception as e:
+                logger.error("OBS: Start Recording Failed: %s", str(e))
                 return False
         return True
 
