@@ -12,7 +12,7 @@ import obsws_python as obs
 from RHUI import UIField, UIFieldType, UIFieldSelectOption
 
 
-MODULE_NAME = "OBS_WS"
+MODULE_NAME = "OBS_CONTROL"
 
 
 class OBS_Actions:
