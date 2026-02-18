@@ -84,6 +84,7 @@ class OBS_Actions:
             heat_name, class_name, class_id = "PracticeMode", "", round_num
         else:
             heat_name = heat.display_name
+            heat_name = heat_name.replace(" / ", "-")  # Prevent unwanted / in filename
             class_id = heat.class_id
             if class_id:
                 class_name = rhdata.get_raceClass(class_id).name
@@ -101,6 +102,8 @@ class OBS_Actions:
 
         for key, val in placeholders.items():
             template = template.replace(key, val)
+
+        template = template.replace(" ", "_")  # OBS doesn't like spaces in filename
 
         return template
 
