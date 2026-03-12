@@ -14,6 +14,7 @@ This software is distributed as a plugin to be added to the RotorHazard.
  * Retro compatibility to WebSocket API v4.(by the docs)
 
 ## Tested on:
+ * Obs-websocket Version: 5.6.3, OBS Studio Version: 32.0.4
  * Obs-websocket Version: 5.5.6, OBS Studio Version: 31.0.3
  * OBS WebSocket Version: 5.4.2, OBS Studio Version: 30.1.0
  * OBS WebSocket Version: 5.0.1, OBS Studio Version: 27.2.4
@@ -33,7 +34,6 @@ The system comprises a RotoHazard plugin and the OBS Studio software for video r
 ### Install Plugin
 
 The recommended method for installation is through the RH UI, specifically the Plug-Ins page. 
-
 
 Manual installation, at the files level, can be achieved by copying the `obs_control` plugin into the custom `plugins` directory in your RotorHazard.
 Install dependencies. File available inside the plugin directory.
@@ -60,6 +60,7 @@ Sample configs for filename:
  - %eventName/%CCYY%MM%DD/%heat-%round ( Includes creation of directory )
  - %CCYY-%MM-%DD_%hh-%mm-%ss_CAAR_%class-%heat-%round
 
+OBS doesn't like space char in the filename. This plug-in converts the ' ' by '_'. Also, the char '/' represents directory. It is converted '/' into '-'.
 
 This plug-in can be active/inactive by setting the parameter ENABLED accordingly.
 
