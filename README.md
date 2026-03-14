@@ -64,8 +64,6 @@ OBS doesn't like space char in the filename. This plug-in converts the ' ' by '_
 
 This plug-in can be active/inactive by setting the parameter ENABLED accordingly.
 
-Note: The enabled checkbox is failing to reflect the real status of the ENABLED parameter. The situation is identified, and the correction can be tracked at the issue [RH1073](https://github.com/RotorHazard/RotorHazard/issues/1073).
-
 The recording can be activated before the race starts by setting the parameter PRE_START with an int value (milliseconds) to the start. Note that the waiting is done in intervals of 0,1 seconds (100 ms).
 
 ### TroubleShoot
