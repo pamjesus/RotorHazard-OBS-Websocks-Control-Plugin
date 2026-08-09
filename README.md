@@ -5,9 +5,8 @@ This software is distributed as a plugin to be added to the RotorHazard.
 
 ## Features
 * OBS customized filename saving. Sample filename Template: "%CCYY%MM%DD/%class-%heat-%round"
-* Start recording before the race starts, for (parameter in milliseconds) 
-* Restart the connection to OBS in case of a failed call to the Webservice.
-* A start/stop recording failure raises a high-priority message in the front end.
+* Start recording customizable before the race start. 
+* Resilient connection to OBS.
 
 ## Also
  * Not required to restart the RH/Raspberry Pi
@@ -22,7 +21,6 @@ This software is distributed as a plugin to be added to the RotorHazard.
 ## USE CASES
 * Control OBS Studio to save the race video.
 * Start recording before the race ( helps detect false starts )
-
 
 ## Compatibility chart
 The current version requires  RHAPI 1.3 fowerd, starting at RotorHazard versions 4.3.1
