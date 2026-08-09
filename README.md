@@ -20,10 +20,11 @@ This software is distributed as a plugin to be added to the RotorHazard.
 
 ## USE CASES
 * Control OBS Studio to save the race video.
-* Start recording before the race ( helps detect false starts )
+* Start recording before the race.
 
 ## Compatibility chart
-The current version requires  RHAPI 1.3 fowerd, starting at RotorHazard versions 4.3.1
+The current version requires RHAPI 1.3 or later, starting with RotorHazard 4.4.0-beta.2.
+Previous versions of this plugin are compatible with RotorHazard 4.3.1.
 
 ## Installation and Setup
 
