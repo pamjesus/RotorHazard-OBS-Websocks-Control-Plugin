@@ -27,7 +27,7 @@ class OBS_Actions:
         if interrupt:
             self._rhapi.ui.message_alert(message)
         else:
-            self._rhapi.ui.message_alert(message)
+            self._rhapi.ui.message_notify(message)
 
     def disconectIfConnected(self):
         if self.OBS and isinstance(self.OBS, OBSManager):
@@ -196,7 +196,7 @@ def initialize(rhapi):
         name=MODULE_NAME,
     )
     rhapi.events.on(
-        Evt.LAPS_CLEAR,
+        Evt.RACE_ABORT,
         obs.do_race_stop,
         default_args=None,
         priority=101,
